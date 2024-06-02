@@ -17,15 +17,14 @@ const ADDRESS =
     },
   });
 
-  const transaction = new TransactionBuilder()
-    .setAddress(ADDRESS)
-    .addActions([
-      Actions.allocateGas(100, 10),
-      Actions.transfer(
-        "1000000000000000",
-        "tb1p0wt007yyzfswhsnwnc45ly9ktyefzyrwznwja0m4gr7n9vjactes80klh4"
-      ),
-    ]);
+  const transaction = new TransactionBuilder().setAddress(ADDRESS).addActions([
+    Actions.allocateGas({ amount: "100", price: "10" }),
+    Actions.transfer({
+      amount: "1000000000000000",
+      recipient:
+        "tb1p0wt007yyzfswhsnwnc45ly9ktyefzyrwznwja0m4gr7n9vjactes80klh4",
+    }),
+  ]);
 
   console.log(await SigningClinet.signAndBroadcast(transaction));
 })();
