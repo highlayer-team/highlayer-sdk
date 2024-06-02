@@ -1,6 +1,6 @@
 {
   "name": "highlayer-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
@@ -14,7 +14,6 @@
   "browser": "dist/bundle.js",
   "dependencies": {
     "bip322-js": "^2.0.0",
-    "bitcoinjs-lib": "^6.1.5",
     "bstring": "^0.3.9",
     "buffer": "^6.0.3",
     "esbuild": "^0.21.4",

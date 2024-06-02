@@ -1,5 +1,3 @@
-const { BIP322, Signer, Verifier, Address } = require("bip322-js");
-
 const Actions = {
   sequencerDeposit: ({ amount }) => ({
     program: "system",

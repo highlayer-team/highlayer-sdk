@@ -19,7 +19,7 @@ const ADDRESS =
 
   const transaction = new TransactionBuilder()
     .setAddress(ADDRESS)
-    .addActions([Actions.sequencerDeposit({ amount: 1000 })]);
+    .addActions([Actions.sequencerDeposit({ amount: "1000" })]);
 
   console.log(await SigningClinet.signAndBroadcast(transaction));
 })();
