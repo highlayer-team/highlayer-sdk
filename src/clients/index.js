@@ -9,6 +9,10 @@ class HighlayerClient {
   }
 
   async getSequencerBalance(address) {
+    if (typeof address !== "string") {
+      throw new Error("address must be a string");
+    }
+
     const response = await fetch(
       `${this.sequencer}/depositBalance/${address}`,
       {
@@ -37,6 +41,16 @@ class SigningHighlayerClient extends HighlayerClient {
   }
 
   async ensureDeposit({ address, minBalance, deposit }) {
+    if (typeof address !== "string") {
+      throw new Error("address must be a string");
+    }
+    if (isNaN(minBalance) || Number(minBalance) <= 0) {
+      throw new Error("minBalance must be a positive number");
+    }
+    if (isNaN(deposit) || Number(deposit) <= 0) {
+      throw new Error("deposit must be a positive number");
+    }
+
     let currentBalance = await this.getSequencerBalance(address);
 
     let minimumBalance = BigInt(minBalance);
@@ -61,12 +75,22 @@ class SigningHighlayerClient extends HighlayerClient {
   }
 
   async signAndBroadcast(transaction) {
+    if (!(transaction instanceof TransactionBuilder)) {
+      throw new Error("Transaction must be an instance of TransactionBuilder");
+    }
+
+    if (!transaction.address) {
+      throw new Error("Transaction must include an 'address' property");
+    }
+
+    if (transaction.actions.length <= 0) {
+      throw new Error("Transaction must include an action");
+    }
+
     let tx = new HighlayerTx(transaction);
 
     let signature = await this.signingFunction(tx.encode());
     tx.signature = signature;
-
-    console.log(tx);
 
     const response = await fetch(`${this.sequencer}/tx`, {
       method: "POST",
