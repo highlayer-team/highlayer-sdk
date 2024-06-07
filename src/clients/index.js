@@ -8,6 +8,7 @@ class HighlayerClient {
     this.node = node;
   }
 
+  // See https://docs.highlayer.io/http-api.html#fetch-available-deposit-on-sequencer
   async getSequencerBalance(address) {
     if (typeof address !== "string") {
       throw new Error("address must be a string");
@@ -22,6 +23,19 @@ class HighlayerClient {
         },
       }
     );
+
+    const data = await response.json();
+
+    return data.balance;
+  }
+
+  async getSequencerFees() {
+    const response = await fetch(`${this.sequencer}/sequencer-prices`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     const data = await response.json();
 
