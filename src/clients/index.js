@@ -2,6 +2,10 @@ const { HighlayerTx } = require("../structs");
 const { TransactionBuilder } = require("../builders/index");
 const { Actions } = require("../helpers/index");
 
+const Big = require("big.js");
+
+Big.PE = 100;
+
 class HighlayerClient {
   constructor({ sequencer = "", node = "" } = {}) {
     this.sequencer = sequencer;
@@ -116,6 +120,37 @@ class SigningHighlayerClient extends HighlayerClient {
 
     const data = await response.json();
     return data;
+  }
+
+  async getSequencerFeePerByteAswellAsYourSequencerBalanceAndFeeForTransactionAndIfYouCantAffordToUploadThenDepositToSequencerThenUploadOrJustUploadIfBalanceSuffices(
+    Transaction
+  ) {
+    let tx = new HighlayerTx(Transaction);
+
+    let sequencerFees = await this.getSequencerFees();
+    let sequnecerFeePerByte = sequencerFees.feePerByte;
+
+    let getSequencerBalance = await this.getSequencerBalance(tx.address);
+    let transactionByteLength = Buffer.byteLength(tx.encode(), "utf8");
+
+    let fee = Big(sequnecerFeePerByte).mul(transactionByteLength);
+
+    let remainingBalance = Big(getSequencerBalance).minus(fee);
+
+    if (remainingBalance.lt(0)) {
+      let sequencerDepositTX = new TransactionBuilder()
+        .setAddress(tx.address)
+        .addActions([Actions.sequencerDeposit({ amount: fee.toString() })]);
+
+      try {
+        await this.signAndBroadcast(sequencerDepositTX);
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    }
+
+    return await this.signAndBroadcast(Transaction);
   }
 }
 

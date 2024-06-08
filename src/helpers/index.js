@@ -1,3 +1,7 @@
+const Big = require("big.js");
+
+Big.PE = 100;
+
 const Actions = {
   sequencerDeposit: ({ amount }) => ({
     program: "system",
@@ -47,4 +51,14 @@ const Actions = {
   }),
 };
 
-module.exports = { Actions };
+const AlanToHi = (number) => {
+  let units = Big(number);
+  return units.div(1000000000000).toString();
+};
+
+const HiToAlan = (number) => {
+  let units = Big(number);
+  return units.mul(1000000000000).toString();
+};
+
+module.exports = { Actions, AlanToHi, HiToAlan };
