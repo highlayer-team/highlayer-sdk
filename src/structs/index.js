@@ -75,6 +75,44 @@ class HighlayerTx {
       .digest("hex");
   }
 
+  extractedRawTxID() {
+    return crypto
+      .createHash("sha256")
+      .update(
+        msgpackr.encode({
+          address: this.address,
+          signature: null,
+          nonce: this.nonce,
+          actions: this.actions,
+          bundlePosition: null,
+          sequencerTxIndex: null,
+          trueTxIndex: null,
+          parentBundleHash: null,
+          sequencerSignature: null,
+        })
+      )
+      .digest();
+  }
+
+  rawTxID() {
+    return crypto
+      .createHash("sha256")
+      .update(
+        msgpackr.encode({
+          address: this.address,
+          signature: this.signature,
+          nonce: this.nonce,
+          actions: this.actions,
+          bundlePosition: this.bundlePosition,
+          sequencerTxIndex: this.sequencerTxIndex,
+          trueTxIndex: null,
+          parentBundleHash: this.parentBundleHash,
+          sequencerSignature: this.sequencerSignature,
+        })
+      )
+      .digest();
+  }
+
   static decode(base58encoded) {
     const buffer = base58.decode(base58encoded);
     const decodedObject = msgpackr.decode(buffer);

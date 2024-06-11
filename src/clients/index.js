@@ -107,7 +107,7 @@ class SigningHighlayerClient extends HighlayerClient {
 
     let tx = new HighlayerTx(transaction);
 
-    let signature = await this.signingFunction(tx.encode());
+    let signature = await this.signingFunction(tx.rawTxID());
     tx.signature = signature;
 
     const response = await fetch(`${this.sequencer}/tx`, {
