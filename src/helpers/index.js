@@ -42,6 +42,11 @@ const Actions = {
       gasForInitActions: gasForInitActions,
     },
   }),
+  contractInteraction: ({ contractId, action, params }) => ({
+    program: contractId,
+    action: action,
+    params,
+  }),
   log: ({ message }) => ({
     program: "system",
     action: "log",
