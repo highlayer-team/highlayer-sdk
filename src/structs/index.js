@@ -1,6 +1,6 @@
 const msgpackr = require("msgpackr");
 const crypto = require("crypto");
-const { base58 } = require("bstring");
+
 class HighlayerTx {
   constructor({
     address,
@@ -25,8 +25,8 @@ class HighlayerTx {
   }
 
   encode() {
-    return base58.encode(
-      msgpackr.encode({
+    
+     return msgpackr.encode({
         address: this.address,
         signature: this.signature,
         nonce: this.nonce,
@@ -37,12 +37,11 @@ class HighlayerTx {
         parentBundleHash: this.parentBundleHash,
         sequencerSignature: this.sequencerSignature,
       })
-    );
+    
   }
 
   extractPrototype() {
-    return base58.encode(
-      msgpackr.encode({
+    return msgpackr.encode({
         address: this.address,
         signature: null,
         nonce: this.nonce,
@@ -53,12 +52,12 @@ class HighlayerTx {
         parentBundleHash: null,
         sequencerSignature: null,
       })
-    );
+    
   }
 
   txID() {
     return crypto
-      .createHash("sha256")
+      .createHash("blake2s256")
       .update(
         msgpackr.encode({
           address: this.address,
@@ -77,7 +76,7 @@ class HighlayerTx {
 
   extractedRawTxID() {
     return crypto
-      .createHash("sha256")
+      .createHash("blake2s256")
       .update(
         msgpackr.encode({
           address: this.address,
@@ -96,7 +95,7 @@ class HighlayerTx {
 
   rawTxID() {
     return crypto
-      .createHash("sha256")
+      .createHash("blake2s256")
       .update(
         msgpackr.encode({
           address: this.address,
@@ -113,8 +112,7 @@ class HighlayerTx {
       .digest();
   }
 
-  static decode(base58encoded) {
-    const buffer = base58.decode(base58encoded);
+  static decode(buffer) {
     const decodedObject = msgpackr.decode(buffer);
     return new HighlayerTx({
       address: decodedObject.address,
