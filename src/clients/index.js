@@ -1,7 +1,7 @@
 const { HighlayerTx } = require("../structs");
 const { TransactionBuilder } = require("../builders/index");
 const { Actions } = require("../helpers/index");
-
+const msgpackr = require("msgpackr");
 const Big = require("big.js");
 
 Big.PE = 100;
@@ -110,15 +110,21 @@ class SigningHighlayerClient extends HighlayerClient {
     let signature = await this.signingFunction(tx.rawTxID());
     tx.signature = signature;
 
+    const encodedTx = tx.encode()
     const response = await fetch(`${this.sequencer}/tx`, {
       method: "POST",
-      headers: {
-        "Content-Type": "text/plain",
-      },
-      body: tx.encode(),
+      headers: [
+        ["Content-Type", "application/vnd.msgpack"],
+        ["Content-Length", encodedTx.byteLength.toString()]
+      ],
+      body: encodedTx,
     });
-
-    const data = await response.json();
+    let data;
+    try {
+      data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
+    } catch (e) {
+      console.error(e)
+    }
     return data;
   }
 
