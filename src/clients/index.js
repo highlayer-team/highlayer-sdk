@@ -45,6 +45,43 @@ class HighlayerClient {
 
     return data;
   }
+
+  async getTransactionFee(transaction) {
+    if (!(transaction instanceof TransactionBuilder)) {
+      throw new Error("Transaction must be an instance of TransactionBuilder");
+    }
+
+    if (!transaction.address) {
+      throw new Error("Transaction must include an 'address' property");
+    }
+
+    if (transaction.actions.length <= 0) {
+      throw new Error("Transaction must include an action");
+    }
+
+    let tx = new HighlayerTx(transaction);
+    tx.actions = tx.actions.filter((action) => action.action !== "allocateGas");
+
+    let signature = await this.signingFunction(tx.rawTxID());
+    tx.signature = signature;
+
+    const encodedTx = tx.encode();
+    console.log(encodedTx);
+    const response = await fetch(`${this.node}/calculateTxGas`, {
+      method: "POST",
+      headers: [
+        ["Content-Type", "application/vnd.msgpack"],
+        ["Content-Length", encodedTx.byteLength.toString()],
+      ],
+      body: encodedTx,
+    });
+
+    let data = await response.json();
+
+    return {
+      gasNeeded: Math.abs(data.gas),
+    };
+  }
 }
 
 class SigningHighlayerClient extends HighlayerClient {
@@ -110,12 +147,12 @@ class SigningHighlayerClient extends HighlayerClient {
     let signature = await this.signingFunction(tx.rawTxID());
     tx.signature = signature;
 
-    const encodedTx = tx.encode()
+    const encodedTx = tx.encode();
     const response = await fetch(`${this.sequencer}/tx`, {
       method: "POST",
       headers: [
         ["Content-Type", "application/vnd.msgpack"],
-        ["Content-Length", encodedTx.byteLength.toString()]
+        ["Content-Length", encodedTx.byteLength.toString()],
       ],
       body: encodedTx,
     });
@@ -123,7 +160,7 @@ class SigningHighlayerClient extends HighlayerClient {
     try {
       data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
     return data;
   }
