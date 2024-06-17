@@ -33,7 +33,7 @@ class TransactionBuilder {
     return this;
   }
 
-  addActions(actions) {
+  setActions(actions) {
     this.actions = [...this.actions, ...actions];
     return this;
   }
