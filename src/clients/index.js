@@ -66,7 +66,7 @@ class HighlayerClient {
     tx.signature = signature;
 
     const encodedTx = tx.encode();
-    console.log(encodedTx);
+
     const response = await fetch(`${this.node}/calculateTxGas`, {
       method: "POST",
       headers: [
