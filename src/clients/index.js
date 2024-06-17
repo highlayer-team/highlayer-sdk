@@ -76,7 +76,7 @@ class HighlayerClient {
       body: encodedTx,
     });
 
-    let data = await response.json();
+    let data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
 
     return {
       gasNeeded: Math.abs(data.gas),
