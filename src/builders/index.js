@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { Actions } = require("..");
 
 class TransactionBuilder {
   constructor({
@@ -34,8 +35,25 @@ class TransactionBuilder {
   }
 
   setActions(actions) {
-    this.actions = [...this.actions, ...actions];
+    if (Array.isArray(actions)) {
+      console.error("actions must be of type Array");
+    }
+    this.actions = actions;
     return this;
+  }
+
+  addActions(actions) {
+    if (!Array.isArray(actions)) {
+      console.error("actions must be of type Array");
+    }
+
+    // Use this because if array isnt set the value is null.
+    // Cant really set it to an empty array because that wouldnt work with sequencer/node
+    if (!Array.isArray(this.actions)) {
+      this.actions = [];
+    }
+
+    this.actions = [...this.actions, ...actions];
   }
 
   setSignature(signature) {
