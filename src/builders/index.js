@@ -1,5 +1,4 @@
 const crypto = require("crypto");
-const { Actions } = require("..");
 
 class TransactionBuilder {
   constructor({
