@@ -34,17 +34,9 @@ class TransactionBuilder {
     return this;
   }
 
-  setActions(actions) {
-    if (Array.isArray(actions)) {
-      console.error("actions must be of type Array");
-    }
-    this.actions = actions;
-    return this;
-  }
-
   addActions(actions) {
     if (!Array.isArray(actions)) {
-      console.error("actions must be of type Array");
+      throw new Error("actions must be of type Array");
     }
 
     // Use this because if array isnt set the value is null.
