@@ -17,7 +17,7 @@ const ADDRESS =
     },
   });
 
-  const transaction = new TransactionBuilder().setAddress(ADDRESS).addActions([
+  const transaction = new TransactionBuilder().setAddress(ADDRESS).setActions([
     Actions.allocateGas({ amount: "100", price: "10" }),
     Actions.transfer({
       amount: "1000000000000000",

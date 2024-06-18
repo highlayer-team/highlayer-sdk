@@ -114,7 +114,7 @@ class SigningHighlayerClient extends HighlayerClient {
     if (minimumBalance > BigInt(currentBalance)) {
       let sequencerDepositTX = new TransactionBuilder()
         .setAddress(address)
-        .addActions([Actions.sequencerDeposit({ amount: depositAmount })]);
+        .setActions([Actions.sequencerDeposit({ amount: depositAmount })]);
 
       try {
         await this.signAndBroadcast(sequencerDepositTX);
@@ -183,7 +183,7 @@ class SigningHighlayerClient extends HighlayerClient {
     if (remainingBalance.lt(0)) {
       let sequencerDepositTX = new TransactionBuilder()
         .setAddress(tx.address)
-        .addActions([Actions.sequencerDeposit({ amount: fee.toString() })]);
+        .setActions([Actions.sequencerDeposit({ amount: fee.toString() })]);
 
       try {
         await this.signAndBroadcast(sequencerDepositTX);
