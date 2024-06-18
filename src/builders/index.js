@@ -46,6 +46,18 @@ class TransactionBuilder {
     }
 
     this.actions = [...this.actions, ...actions];
+
+    return this;
+  }
+
+  setActions(actions) {
+    if (!Array.isArray(actions)) {
+      throw new Error("actions must be of type Array");
+    }
+
+    this.actions = actions;
+
+    return this;
   }
 
   setSignature(signature) {
