@@ -1,4 +1,4 @@
-const { HighlayerTx } = require("../structs");
+const { HighlayerTx, KVStore } = require("../structs");
 const { TransactionBuilder } = require("../builders/index");
 const { Actions } = require("../helpers/index");
 const msgpackr = require("msgpackr");
@@ -7,7 +7,7 @@ const Big = require("big.js");
 Big.PE = 100;
 
 class HighlayerClient {
-  constructor({ sequencer = "", node = "" } = {}) {
+  constructor({ sequencer = null, node = null } = {}) {
     this.sequencer = sequencer;
     this.node = node;
   }
@@ -23,12 +23,12 @@ class HighlayerClient {
       {
         method: "GET",
         headers: {
-          "Content-Type": "text/plain",
+          "Content-Type": "application/vnd.msgpack",
         },
       }
     );
 
-    const data = await response.json();
+    let data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
 
     return data.balance;
   }
@@ -37,11 +37,11 @@ class HighlayerClient {
     const response = await fetch(`${this.sequencer}/sequencer-prices`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/vnd.msgpack",
       },
     });
 
-    const data = await response.json();
+    let data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
 
     return data;
   }
@@ -81,6 +81,17 @@ class HighlayerClient {
     return {
       gasNeeded: Math.abs(data.gas),
     };
+  }
+
+  KV(contractId) {
+    if (!this.node) {
+      throw new Error("You must provide a Node in Clients constructor");
+    }
+
+    return new KVStore({
+      node: this.node,
+      contractId,
+    });
   }
 }
 
@@ -144,10 +155,12 @@ class SigningHighlayerClient extends HighlayerClient {
 
     let tx = new HighlayerTx(transaction);
 
-    let signature = await this.signingFunction(tx.rawTxID());
+    let signature = await this.signingFunction({ ...tx });
     tx.signature = signature;
 
     const encodedTx = tx.encode();
+
+    console.log(signature);
     const response = await fetch(`${this.sequencer}/tx`, {
       method: "POST",
       headers: [

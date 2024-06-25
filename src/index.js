@@ -1,5 +1,5 @@
 const { HighlayerTx } = require("./structs");
-const { Actions, AlanToHi, HiToAlan } = require("./helpers");
+const { Actions, AlanToHi, HiToAlan, PrivateKeySigner } = require("./helpers");
 const { SigningHighlayerClient, HighlayerClient } = require("./clients");
 const { TransactionBuilder } = require("./builders");
 
@@ -13,6 +13,7 @@ module.exports = {
   TransactionBuilder,
   AlanToHi,
   HiToAlan,
+  PrivateKeySigner,
   bip322: {
     BIP322,
     Signer,

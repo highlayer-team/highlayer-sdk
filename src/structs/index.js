@@ -25,34 +25,31 @@ class HighlayerTx {
   }
 
   encode() {
-    
-     return msgpackr.encode({
-        address: this.address,
-        signature: this.signature,
-        nonce: this.nonce,
-        actions: this.actions,
-        bundlePosition: this.bundlePosition,
-        sequencerTxIndex: this.sequencerTxIndex,
-        trueTxIndex: this.trueTxIndex,
-        parentBundleHash: this.parentBundleHash,
-        sequencerSignature: this.sequencerSignature,
-      })
-    
+    return msgpackr.encode({
+      address: this.address,
+      signature: this.signature,
+      nonce: this.nonce,
+      actions: this.actions,
+      bundlePosition: this.bundlePosition,
+      sequencerTxIndex: this.sequencerTxIndex,
+      trueTxIndex: this.trueTxIndex,
+      parentBundleHash: this.parentBundleHash,
+      sequencerSignature: this.sequencerSignature,
+    });
   }
 
   extractPrototype() {
     return msgpackr.encode({
-        address: this.address,
-        signature: null,
-        nonce: this.nonce,
-        actions: this.actions,
-        bundlePosition: null,
-        sequencerTxIndex: null,
-        trueTxIndex: null,
-        parentBundleHash: null,
-        sequencerSignature: null,
-      })
-    
+      address: this.address,
+      signature: null,
+      nonce: this.nonce,
+      actions: this.actions,
+      bundlePosition: null,
+      sequencerTxIndex: null,
+      trueTxIndex: null,
+      parentBundleHash: null,
+      sequencerSignature: null,
+    });
   }
 
   txID() {
@@ -128,4 +125,31 @@ class HighlayerTx {
   }
 }
 
-module.exports = { HighlayerTx };
+class KVStore {
+  constructor({ node, contractId }) {
+    this.node = node;
+    this.contractId = contractId;
+  }
+
+  async get(key) {
+    try {
+      const response = await fetch(
+        `${this.node}/kv/${this.contractId}/${key}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/vnd.msgpack",
+          },
+        }
+      );
+
+      let data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
+
+      return data;
+    } catch (e) {
+      return undefined;
+    }
+  }
+}
+
+module.exports = { HighlayerTx, KVStore };

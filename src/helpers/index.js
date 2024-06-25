@@ -1,4 +1,5 @@
 const Big = require("big.js");
+const { HighlayerTx, bip322 } = require("../");
 
 Big.PE = 100;
 
@@ -66,4 +67,11 @@ const HiToAlan = (number) => {
   return units.mul(1000000000000).toString();
 };
 
-module.exports = { Actions, AlanToHi, HiToAlan };
+const PrivateKeySigner = (PrivateKey, Address) => {
+  return function signer(transaction) {
+    let transactionHash = new HighlayerTx(transaction).rawTxID();
+    return bip322.Signer.sign(PrivateKey, Address, transactionHash);
+  };
+};
+
+module.exports = { Actions, AlanToHi, HiToAlan, PrivateKeySigner };

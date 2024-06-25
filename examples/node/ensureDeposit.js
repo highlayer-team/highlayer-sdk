@@ -1,4 +1,4 @@
-const { SigningHighlayerClient, bip322 } = require("highlayer-sdk");
+const { SigningHighlayerClient, PrivateKeySigner } = require("highlayer-sdk");
 
 const PRIVATE_KEY = "";
 const ADDRESS =
@@ -7,9 +7,7 @@ const ADDRESS =
 (async () => {
   let SigningClinet = new SigningHighlayerClient({
     sequencer: "http://127.0.0.1:2880",
-    signingFunction: function signer(data) {
-      return bip322.Signer.sign(PRIVATE_KEY, ADDRESS, data);
-    },
+    signingFunction: PrivateKeySigner(PRIVATE_KEY, ADDRESS),
   });
 
   console.log(
