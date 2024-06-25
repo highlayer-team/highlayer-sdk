@@ -168,7 +168,6 @@ class SigningHighlayerClient extends HighlayerClient {
 
     const encodedTx = tx.encode();
 
-    console.log(signature);
     const response = await fetch(`${this.sequencer}/tx`, {
       method: "POST",
       headers: [
