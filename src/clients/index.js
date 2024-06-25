@@ -106,6 +106,14 @@ class SigningHighlayerClient extends HighlayerClient {
     return this;
   }
 
+  Contract(contractId) {
+    return new HighlayerContract({
+      SigningClient: this,
+      node: this.node,
+      contractId,
+    });
+  }
+
   async ensureDeposit({ address, minBalance, deposit }) {
     if (typeof address !== "string") {
       throw new Error("address must be a string");
@@ -207,6 +215,30 @@ class SigningHighlayerClient extends HighlayerClient {
     }
 
     return await this.signAndBroadcast(Transaction);
+  }
+}
+
+class HighlayerContract extends KVStore {
+  constructor({ SigningClient, Sequencer, node, contractId }) {
+    super({ node, contractId });
+    this.SigningClient = SigningClient;
+    this.Sequencer = Sequencer;
+  }
+
+  async interact({ action, params, gas, address }) {
+    const transaction = new TransactionBuilder()
+      .setAddress(address)
+      .setActions([
+        gas,
+        Actions.contractInteraction({
+          contractId: this.contractId,
+          action,
+          params,
+        }),
+      ]);
+
+    // console.log(this.node);
+    return this.SigningClient.signAndBroadcast(transaction);
   }
 }
 

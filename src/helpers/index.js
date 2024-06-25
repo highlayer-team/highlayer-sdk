@@ -1,5 +1,6 @@
 const Big = require("big.js");
-const { HighlayerTx, bip322 } = require("../");
+const { HighlayerTx } = require("../structs/index");
+const bip322 = require("bip322-js");
 
 Big.PE = 100;
 
