@@ -8,8 +8,8 @@ Big.PE = 100;
 
 class HighlayerClient {
   constructor({
-    sequencer = "http://sequencer-testnet.highlayer.io",
-    node = "https://node-1.highlayer.io",
+    sequencer = "http://sequencer.highlayer.io",
+    node = "https://seed-node.highlayer.io/",
   } = {}) {
     this.sequencer = sequencer.replace(/\/$/, "");
     this.node = node.replace(/\/$/, "");

@@ -17,8 +17,8 @@ const PARAMS = {
 
 (async () => {
   const SigningClient = new SigningHighlayerClient({
-    sequencer: "http://sequencer-testnet.highlayer.io/",
-    node: "https://node-1.highlayer.io/",
+    sequencer: "http://sequencer.highlayer.io/",
+    node: "https://seed-node.highlayer.io/",
     signingFunction: PrivateKeySigner(PRIVATE_KEY, ADDRESS),
   });
 

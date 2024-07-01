@@ -10,7 +10,8 @@ const ADDRESS = "";
 
 (async () => {
   let SigningClinet = new SigningHighlayerClient({
-    sequencer: "http://sequencer-testnet.highlayer.io/",
+    sequencer: "http://sequencer.highlayer.io/",
+    node: "https://seed-node.highlayer.io/",
     signingFunction: PrivateKeySigner(PRIVATE_KEY, ADDRESS),
   });
 
