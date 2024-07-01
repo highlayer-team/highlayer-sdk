@@ -1,13 +1,13 @@
-const { HighlayerClient, PrivateKeySigner } = require("../../src");
+const { HighlayerClient, PrivateKeySigner } = require("highlayer-sdk");
 
 const ContractAddress =
-  "hlcontract1qrktkf7a63qdr73rtwsvafdv3kd9r5whs8q7w88f2wsdv4mgcc6jqf9aq4x";
-const Key = "balances.yourAddress";
+  "hlcontract1qjty79prmqevsrn6e6tutfu2tkmccvkrq4r6ztwkrd0mn7j5j5jyqtrp523";
+const Key = "counter";
 
 (async () => {
   let SigningClinet = new HighlayerClient({
-    sequencer: "http://127.0.0.1:2880",
-    node: "http://51.159.210.149:3000",
+    sequencer: "http://sequencer-testnet.highlayer.io/",
+    node: "https://node-1.highlayer.io/",
   });
 
   let contract = SigningClinet.KV(ContractAddress);

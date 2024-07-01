@@ -1,14 +1,11 @@
 const {
   SigningHighlayerClient,
-  HighlayerContract,
-  TransactionBuilder,
   Actions,
   PrivateKeySigner,
-} = require("../../src");
+} = require("highlayer-sdk");
 
 const PRIVATE_KEY = "";
-const ADDRESS =
-  "tb1p0wt007yyzfswhsnwnc45ly9ktyefzyrwznwja0m4gr7n9vjactes80klh4";
+const ADDRESS = "";
 const CONTRACT =
   "hlcontract1qrktkf7a63qdr73rtwsvafdv3kd9r5whs8q7w88f2wsdv4mgcc6jqf9aq4x";
 
@@ -20,8 +17,8 @@ const PARAMS = {
 
 (async () => {
   const SigningClient = new SigningHighlayerClient({
-    node: "http://51.159.210.149:3000",
-    sequencer: "http://51.159.210.149:2880",
+    sequencer: "http://sequencer-testnet.highlayer.io/",
+    node: "https://node-1.highlayer.io/",
     signingFunction: PrivateKeySigner(PRIVATE_KEY, ADDRESS),
   });
 

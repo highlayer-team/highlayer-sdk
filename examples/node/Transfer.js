@@ -6,12 +6,11 @@ const {
 } = require("highlayer-sdk");
 
 const PRIVATE_KEY = "";
-const ADDRESS =
-  "tb1p0wt007yyzfswhsnwnc45ly9ktyefzyrwznwja0m4gr7n9vjactes80klh4";
+const ADDRESS = "";
 
 (async () => {
   let SigningClinet = new SigningHighlayerClient({
-    sequencer: "http://127.0.0.1:2880",
+    sequencer: "http://sequencer-testnet.highlayer.io/",
     signingFunction: PrivateKeySigner(PRIVATE_KEY, ADDRESS),
   });
 
@@ -19,8 +18,7 @@ const ADDRESS =
     Actions.allocateGas({ amount: "100", price: "10" }),
     Actions.transfer({
       amount: "1000000000000000",
-      recipient:
-        "tb1p0wt007yyzfswhsnwnc45ly9ktyefzyrwznwja0m4gr7n9vjactes80klh4",
+      recipient: "ADDRESS",
     }),
   ]);
 

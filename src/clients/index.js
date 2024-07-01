@@ -7,15 +7,17 @@ const Big = require("big.js");
 Big.PE = 100;
 
 class HighlayerClient {
-  constructor({ sequencer = null, node = null } = {}) {
-    this.sequencer = sequencer;
-    this.node = node;
+  constructor({
+    sequencer = "http://sequencer-testnet.highlayer.io",
+    node = "https://node-1.highlayer.io",
+  } = {}) {
+    this.sequencer = sequencer.replace(/\/$/, "");
+    this.node = node.replace(/\/$/, "");
   }
 
-  // See https://docs.highlayer.io/http-api.html#fetch-available-deposit-on-sequencer
   async getSequencerBalance(address) {
     if (typeof address !== "string") {
-      throw new Error("address must be a string");
+      throw new Error("Address must be a string");
     }
 
     const response = await fetch(
@@ -28,22 +30,19 @@ class HighlayerClient {
       }
     );
 
-    let data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
-
+    const data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
     return data.balance;
   }
 
   async getSequencerFees() {
-    const response = await fetch(`${this.sequencer}/sequencer-prices`, {
+    const response = await fetch(`${this.sequencer}/sequencerPrices`, {
       method: "GET",
       headers: {
         "Content-Type": "application/vnd.msgpack",
       },
     });
 
-    let data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
-
-    return data;
+    return msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
   }
 
   async getTransactionFee(transaction) {
@@ -55,28 +54,28 @@ class HighlayerClient {
       throw new Error("Transaction must include an 'address' property");
     }
 
-    if (transaction.actions.length <= 0) {
-      throw new Error("Transaction must include an action");
+    if (transaction.actions.length === 0) {
+      throw new Error("Transaction must include at least one action");
     }
 
-    let tx = new HighlayerTx(transaction);
+    const tx = new HighlayerTx(transaction);
     tx.actions = tx.actions.filter((action) => action.action !== "allocateGas");
 
-    let signature = await this.signingFunction({ ...tx });
+    const signature = await this.signingFunction({ ...tx });
     tx.signature = signature;
 
     const encodedTx = tx.encode();
 
     const response = await fetch(`${this.node}/calculateTxGas`, {
       method: "POST",
-      headers: [
-        ["Content-Type", "application/vnd.msgpack"],
-        ["Content-Length", encodedTx.byteLength.toString()],
-      ],
+      headers: {
+        "Content-Type": "application/vnd.msgpack",
+        "Content-Length": encodedTx.byteLength.toString(),
+      },
       body: encodedTx,
     });
 
-    let data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
+    const data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
 
     return {
       gasNeeded: Math.abs(data.gas),
@@ -85,7 +84,7 @@ class HighlayerClient {
 
   KV(contractId) {
     if (!this.node) {
-      throw new Error("You must provide a Node in Clients constructor");
+      throw new Error("You must provide a Node in the Client's constructor");
     }
 
     return new KVStore({
@@ -116,7 +115,7 @@ class SigningHighlayerClient extends HighlayerClient {
 
   async ensureDeposit({ address, minBalance, deposit }) {
     if (typeof address !== "string") {
-      throw new Error("address must be a string");
+      throw new Error("Address must be a string");
     }
     if (isNaN(minBalance) || Number(minBalance) <= 0) {
       throw new Error("minBalance must be a positive number");
@@ -125,27 +124,25 @@ class SigningHighlayerClient extends HighlayerClient {
       throw new Error("deposit must be a positive number");
     }
 
-    let currentBalance = await this.getSequencerBalance(address);
-
-    let minimumBalance = BigInt(minBalance);
-    let depositAmount = BigInt(deposit);
+    const currentBalance = await this.getSequencerBalance(address);
+    const minimumBalance = BigInt(minBalance);
+    const depositAmount = BigInt(deposit);
 
     if (minimumBalance > BigInt(currentBalance)) {
-      let sequencerDepositTX = new TransactionBuilder()
+      const sequencerDepositTX = new TransactionBuilder()
         .setAddress(address)
         .addActions([Actions.sequencerDeposit({ amount: depositAmount })]);
 
       try {
         await this.signAndBroadcast(sequencerDepositTX);
+        return true;
       } catch (e) {
-        console.error(e);
+        console.error("Error during deposit:", e);
         return false;
       }
-
-      return true;
-    } else {
-      return true;
     }
+
+    return true;
   }
 
   async signAndBroadcast(transaction) {
@@ -157,71 +154,66 @@ class SigningHighlayerClient extends HighlayerClient {
       throw new Error("Transaction must include an 'address' property");
     }
 
-    if (transaction.actions.length <= 0) {
-      throw new Error("Transaction must include an action");
+    if (transaction.actions.length === 0) {
+      throw new Error("Transaction must include at least one action");
     }
 
-    let tx = new HighlayerTx(transaction);
-
-    let signature = await this.signingFunction({ ...tx });
+    const tx = new HighlayerTx(transaction);
+    const signature = await this.signingFunction({ ...tx });
     tx.signature = signature;
 
     const encodedTx = tx.encode();
 
     const response = await fetch(`${this.sequencer}/tx`, {
       method: "POST",
-      headers: [
-        ["Content-Type", "application/vnd.msgpack"],
-        ["Content-Length", encodedTx.byteLength.toString()],
-      ],
+      headers: {
+        "Content-Type": "application/vnd.msgpack",
+        "Content-Length": encodedTx.byteLength.toString(),
+      },
       body: encodedTx,
     });
-    let data;
+
     try {
-      data = msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
+      return msgpackr.unpack(new Uint8Array(await response.arrayBuffer()));
     } catch (e) {
-      console.error(e);
+      console.error("Error unpacking response:", e);
+      throw e;
     }
-    return data;
   }
 
   async getSequencerFeePerByteAswellAsYourSequencerBalanceAndFeeForTransactionAndIfYouCantAffordToUploadThenDepositToSequencerThenUploadOrJustUploadIfBalanceSuffices(
-    Transaction
+    transaction
   ) {
-    let tx = new HighlayerTx(Transaction);
+    const tx = new HighlayerTx(transaction);
+    const sequencerFees = await this.getSequencerFees();
+    const sequencerFeePerByte = sequencerFees.feePerByte;
+    const sequencerBalance = await this.getSequencerBalance(tx.address);
+    const transactionByteLength = Buffer.byteLength(tx.encode(), "utf8");
 
-    let sequencerFees = await this.getSequencerFees();
-    let sequnecerFeePerByte = sequencerFees.feePerByte;
-
-    let getSequencerBalance = await this.getSequencerBalance(tx.address);
-    let transactionByteLength = Buffer.byteLength(tx.encode(), "utf8");
-
-    let fee = Big(sequnecerFeePerByte).mul(transactionByteLength);
-
-    let remainingBalance = Big(getSequencerBalance).minus(fee);
+    const fee = Big(sequencerFeePerByte).mul(transactionByteLength);
+    const remainingBalance = Big(sequencerBalance).minus(fee);
 
     if (remainingBalance.lt(0)) {
-      let sequencerDepositTX = new TransactionBuilder()
+      const sequencerDepositTX = new TransactionBuilder()
         .setAddress(tx.address)
         .addActions([Actions.sequencerDeposit({ amount: fee.toString() })]);
 
       try {
         await this.signAndBroadcast(sequencerDepositTX);
       } catch (e) {
-        console.error(e);
+        console.error("Error during deposit:", e);
         return false;
       }
     }
 
-    return await this.signAndBroadcast(Transaction);
+    return this.signAndBroadcast(transaction);
   }
 }
 
 class HighlayerContract extends KVStore {
-  constructor({ SigningClient, Sequencer, node, contractId }) {
+  constructor({ SigningClient, node, contractId }) {
     super({ node, contractId });
     this.SigningClient = SigningClient;
-    this.Sequencer = Sequencer;
   }
 
   async interact({ action, params, gas, address }) {
@@ -236,7 +228,6 @@ class HighlayerContract extends KVStore {
         }),
       ]);
 
-    // console.log(this.node);
     return this.SigningClient.signAndBroadcast(transaction);
   }
 }
