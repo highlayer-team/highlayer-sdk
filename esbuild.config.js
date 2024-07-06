@@ -8,7 +8,7 @@ esbuild
     bundle: true,
     outfile: "./dist/bundle.js",
     platform: "browser",
-    format: "iife",
+    format: "esm",
     globalName: "highlayer",
     minify: true,
     sourcemap: true,

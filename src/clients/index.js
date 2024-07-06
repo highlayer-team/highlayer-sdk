@@ -61,8 +61,8 @@ class HighlayerClient {
     const tx = new HighlayerTx(transaction);
     tx.actions = tx.actions.filter((action) => action.action !== "allocateGas");
 
-    const signature = await this.signingFunction({ ...tx });
-    tx.signature = signature;
+    // const signature = await this.signingFunction({ ...tx });
+    // tx.signature = signature;
 
     const encodedTx = tx.encode();
 
