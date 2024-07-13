@@ -82,6 +82,35 @@ class HighlayerClient {
     };
   }
 
+  async injectFee(transaction) {
+    if (!(transaction instanceof TransactionBuilder)) {
+      throw new Error("Transaction must be an instance of TransactionBuilder");
+    }
+
+    if (!transaction.address) {
+      throw new Error("Transaction must include an 'address' property");
+    }
+
+    if (transaction.actions.length === 0) {
+      throw new Error("Transaction must include at least one action");
+    }
+
+    transaction.actions = transaction.actions.filter(
+      (action) => action.action !== "allocateGas"
+    );
+
+    let fee = await this.getTransactionFee(transaction);
+
+    transaction.actions.unshift(
+      Actions.allocateGas({
+        amount: fee.gasNeeded,
+        price: 1,
+      })
+    );
+
+    return transaction;
+  }
+
   KV(contractId) {
     if (!this.node) {
       throw new Error("You must provide a Node in the Client's constructor");
